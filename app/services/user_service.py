@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin
+from app.schemas.user import UserCreate
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.security import create_access_token
 
@@ -66,11 +67,11 @@ def create_user(
     return new_user
 
 def login_user(
-    user: UserLogin,
+    form_data: OAuth2PasswordRequestForm,
     db: Session
 ):
     existing_user = db.query(User).filter(
-        User.email == user.email
+        User.email == form_data.username
     ).first()
 
     if not existing_user:
@@ -80,7 +81,7 @@ def login_user(
         )
 
     if not verify_password(
-        user.password,
+        form_data.password,
         existing_user.hashed_password
     ):
         raise HTTPException(
@@ -89,12 +90,12 @@ def login_user(
         )
 
     access_token = create_access_token(
-    {
-        "sub": existing_user.email
-    }
+        {
+            "sub": existing_user.email
+        }
     )
 
     return {
-    "access_token": access_token,
-    "token_type": "bearer"
+        "access_token": access_token,
+        "token_type": "bearer"
     }
