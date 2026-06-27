@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserLogin
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
@@ -62,3 +62,30 @@ def create_user(
     db.refresh(new_user)
 
     return new_user
+
+def login_user(
+    user: UserLogin,
+    db: Session
+):
+    existing_user = db.query(User).filter(
+        User.email == user.email
+    ).first()
+
+    if not existing_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    if not verify_password(
+        user.password,
+        existing_user.hashed_password
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    return {
+        "message": "Login successful"
+    }
