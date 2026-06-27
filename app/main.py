@@ -1,6 +1,13 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.api.users import router as users_router
+
+app = FastAPI(
+    title="Notes API",
+    version="1.0.0"
+)
+
+app.include_router(users_router)
 
 
 @app.get("/")
