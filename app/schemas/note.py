@@ -10,7 +10,12 @@ class NoteResponse(BaseModel):
     id: int
     title: str
     content: str
+    user_id: int
 
     model_config = {
         "from_attributes": True
     }
+
+class NoteUpdate(BaseModel):
+    title: str
+    content: str
