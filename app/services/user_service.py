@@ -5,6 +5,8 @@ from fastapi import HTTPException
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin
 
+from app.core.security import create_access_token
+
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
@@ -86,6 +88,13 @@ def login_user(
             detail="Invalid email or password"
         )
 
+    access_token = create_access_token(
+    {
+        "sub": existing_user.email
+    }
+    )
+
     return {
-        "message": "Login successful"
+    "access_token": access_token,
+    "token_type": "bearer"
     }
